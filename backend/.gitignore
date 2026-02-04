@@ -1,0 +1,29 @@
+# Create .gitignore
+@"
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+
+## Visual Studio
+.vs/
+.vscode/
+
+## Database
+*.mdf
+*.ldf
+
+## Secrets
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+
+## OS
+.DS_Store
+Thumbs.db
+"@ | Set-Content -Path ".gitignore"
