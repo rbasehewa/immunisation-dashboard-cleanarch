@@ -148,7 +148,7 @@ GET /api/dashboard/users/status/{status}
 
 **Ryan Maddumahewa**
 - Portfolio: [ryanmaddumahewa.dev](https://ryanmaddumahewa.dev)
-- LinkedIn: [LinkedIn]([https://ryanmaddumahewa.dev](https://www.linkedin.com/in/ryanmaddumahewa/))
+- LinkedIn: [LinkedIn](https://www.linkedin.com/in/ryanmaddumahewa/)
 - Location: Perth, Western Australia
 
 ## 📝 License
