@@ -14,11 +14,37 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
         Title = "Immunisation Dashboard API",
         Version = "v1",
-        Description = "API for managing immunisation dashboard"
+        Description = "API for managing immunisation dashboard with JWT authentication"
+    });
+
+    // Add JWT Authentication to Swagger
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Enter 'Bearer' followed by a space and your JWT token.\n\nExample: Bearer eyJhbGci..."
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
     });
 });
 
@@ -51,6 +77,25 @@ builder.Services.AddCors(options =>
 });
 
 // ─────────────────────────────────────
+// 5. AUTHENTICATION - JWT Bearer Token
+// ─────────────────────────────────────
+builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuer = true,              // Check token was created by us
+            ValidateAudience = true,            // Check token is for our clients
+            ValidateLifetime = true,            // Check token hasn't expired
+            ValidateIssuerSigningKey = true,    // Check signature is valid
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
+
+// ─────────────────────────────────────
 // BUILD
 // ─────────────────────────────────────
 var app = builder.Build();
@@ -70,7 +115,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
-app.UseAuthorization();
-app.MapControllers();
+app.UseAuthentication(); // "Who are you?" (checks the token)
+app.UseAuthorization(); // "Are you allowed?" (checks permissions)
+app.MapControllers(); // Routes to your controller
 
 app.Run();
